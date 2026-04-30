@@ -13,6 +13,9 @@ workflows:
       - name: Install dependencies
         script: npm install
 
+      - name: Generate Icons and Splash Screens
+        script: npx @capacitor/assets generate --android
+
       - name: Set Android SDK location
         script: echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
 
