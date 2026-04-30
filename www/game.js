@@ -1,4 +1,3 @@
-import { initAds, showBanner, showInterstitial } from "./ads.js";
 kaplay({
     width: 500,
     height: 800,
@@ -6,9 +5,11 @@ kaplay({
     stretch: true,
 });
 
+document.addEventListener("deviceready", async () => {
+    await initAds();
+    await showBanner();
+});
 
-initAds();
-showBanner();
 
 // sprites
 loadSprite("live", "heart-o.png");
@@ -150,20 +151,6 @@ function updateHP() {
 
 
 
-function showAdThenRestart() {
-
-    if (typeof gdsdk !== "undefined" && gdsdk.showAd) {
-
-        // set flag FIRST
-        window.__restartAfterAd = true;
-
-        // then show ad
-        gdsdk.showAd();
-
-    } else {
-        go("game");
-    }
-}
 
 const scoreLabel = add([
     text(score),
@@ -222,10 +209,14 @@ btn.add([
 ]);
 
 
+btn.onClick(async () => {
+   try {
+      await showInterstitial();
+   } catch (e) {
+      console.log(e);
+   }
 
-btn.onClick(() => {
-   showInterstitial();
-   showAdThenRestart();
+   go("game"); // restart properly
 });
 
 });
