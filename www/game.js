@@ -209,14 +209,9 @@ btn.add([
 ]);
 
 
-btn.onClick(async () => {
-   try {
-      await showInterstitial();
-   } catch (e) {
-      console.log(e);
-   }
-
-   go("game"); // restart properly
+btn.onClick(() => {
+   showInterstitial().catch(() => {});
+   go("game");
 });
 
 });
