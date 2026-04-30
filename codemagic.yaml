@@ -13,8 +13,8 @@ workflows:
       - name: Install dependencies
         script: npm install
 
-      - name: Build web assets
-        script: npm run build || echo "skip build"
+      - name: Set Android SDK location
+        script: echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
 
       - name: Sync Capacitor
         script: npx cap sync android
@@ -25,4 +25,4 @@ workflows:
           ./gradlew assembleRelease
 
     artifacts:
-      - android/app/build/outputs/apk/release/*.apk
+      - android/app/build/outputs/**/*.apk
