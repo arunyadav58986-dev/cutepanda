@@ -13,6 +13,12 @@ workflows:
       - name: Install dependencies
         script: npm install
 
+      - name: Force install sharp for M2
+        script: npm install --platform=darwin --arch=arm64 sharp
+
+      - name: Rebuild sharp for M2 architecture
+        script: npm rebuild sharp
+
       - name: Generate Icons and Splash Screens
         script: npx @capacitor/assets generate --android
 
