@@ -1,7 +1,6 @@
 const UnityAds = window.Capacitor?.Plugins?.UnityAds;
-
-const GAME_ID = '6104076';
-const REWARDED_PLACEMENT_ID = 'Rewarded_Android';
+const GAME_ID = "6104076";
+const REWARDED_PLACEMENT_ID = "Rewarded_Android";
 
 async function initAds() {
   if (!UnityAds) {
@@ -19,6 +18,8 @@ async function initAds() {
     console.log("Init failed:", e);
   }
 }
+
+initAds();
 
 kaplay({
     width: 500,
@@ -243,7 +244,6 @@ btn.onClick(async () => {
     go("game");
   }
 });
-
 
 
 });
