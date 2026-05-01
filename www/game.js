@@ -4,7 +4,7 @@ const REWARDED_PLACEMENT_ID = "Rewarded_Android";
 
 async function initAds() {
   if (!UnityAds) {
-    console.log("UnityAds plugin not found");
+    alert("UnityAds plugin not found");
     return;
   }
 
@@ -13,9 +13,9 @@ async function initAds() {
       gameId: GAME_ID,
       testMode: true
     });
-    console.log("Unity Ads initialized");
+    alert("Unity Ads initialized");
   } catch (e) {
-    console.log("Init failed:", e);
+    alert("Init failed:", e);
   }
 }
 
@@ -240,7 +240,7 @@ btn.onClick(async () => {
     });
     go("game");
   } catch (e) {
-    console.log("Ad failed:", e);
+    alert("Ad failed:", e);
     go("game");
   }
 });
