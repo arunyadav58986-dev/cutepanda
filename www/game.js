@@ -233,17 +233,50 @@ btn.add([
 
 
 
+
+
+
+
+
+
+
 btn.onClick(async () => {
+  alert("CLICKED: replay button");
+
+  console.log("DEBUG: button clicked");
+
   try {
+    alert("DEBUG: calling showRewarded");
+
     await UnityAds.showRewarded({
-      placementId: REWARDED_PLACEMENT_ID
+      placementId: REWARDED_PLACEMENT_ID,
+
+      onComplete: () => {
+        alert("DEBUG: AD COMPLETED");
+        go("game");
+      },
+
+      onFailed: (e) => {
+        alert("DEBUG: AD FAILED: " + JSON.stringify(e));
+        console.log("Rewarded failed:", e);
+        go("game");
+      }
     });
-    go("game");
+
+    alert("DEBUG: showRewarded resolved");
   } catch (e) {
-    alert("Ad failed:", e);
+    alert("DEBUG: EXCEPTION: " + e);
+    console.log("Rewarded exception:", e);
     go("game");
   }
 });
+
+
+
+
+
+
+
 
 
 });
