@@ -1,27 +1,24 @@
-import { registerPlugin } from '@capacitor/core';
+const UnityAds = window.Capacitor?.Plugins?.UnityAds;
 
-const UnityAds = registerPlugin('UnityAds');
-
-const REWARDED_PLACEMENT_ID = 'Rewarded_Android';
-const INTERSTITIAL_PLACEMENT_ID = 'Interstitial_Android';
-
-// put your Unity Game ID here from Unity dashboard/project settings
 const GAME_ID = '6104076';
-
+const REWARDED_PLACEMENT_ID = 'Rewarded_Android';
 
 async function initAds() {
+  if (!UnityAds) {
+    console.log("UnityAds plugin not found");
+    return;
+  }
+
   try {
     await UnityAds.init({
       gameId: GAME_ID,
       testMode: true
     });
+    console.log("Unity Ads initialized");
   } catch (e) {
     console.log("Init failed:", e);
   }
 }
-
-initAds();
-
 
 kaplay({
     width: 500,
@@ -234,14 +231,20 @@ btn.add([
 ]);
 
 
-btn.onClick(() => {
-    UnityAds.showRewarded({
-        placementId: "Rewarded_Android"
-    }).catch((e) => {
-        console.log("Ad failed:", e);
-        go("game"); // fallback if ad fails
+
+btn.onClick(async () => {
+  try {
+    await UnityAds.showRewarded({
+      placementId: REWARDED_PLACEMENT_ID
     });
+    go("game");
+  } catch (e) {
+    console.log("Ad failed:", e);
+    go("game");
+  }
 });
+
+
 
 });
 
