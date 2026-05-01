@@ -241,36 +241,20 @@ btn.add([
 
 
 btn.onClick(async () => {
-  alert("CLICKED: replay button");
-
-  console.log("DEBUG: button clicked");
-
   try {
-    alert("DEBUG: calling showRewarded");
+    alert("Replay clicked");
 
-    await UnityAds.showRewarded({
-      placementId: REWARDED_PLACEMENT_ID,
-
-      onComplete: () => {
-        alert("DEBUG: AD COMPLETED");
-        go("game");
-      },
-
-      onFailed: (e) => {
-        alert("DEBUG: AD FAILED: " + JSON.stringify(e));
-        console.log("Rewarded failed:", e);
-        go("game");
-      }
+    const result = await UnityAds.showRewarded({
+      placementId: REWARDED_PLACEMENT_ID
     });
 
-    alert("DEBUG: showRewarded resolved");
+    alert("Ad finished: " + JSON.stringify(result));
+    go("game");
   } catch (e) {
-    alert("DEBUG: EXCEPTION: " + e);
-    console.log("Rewarded exception:", e);
+    alert("Ad failed: " + e);
     go("game");
   }
 });
-
 
 
 

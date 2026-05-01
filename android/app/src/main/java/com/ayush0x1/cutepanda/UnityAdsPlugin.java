@@ -42,7 +42,7 @@ public class UnityAdsPlugin extends Plugin implements IUnityAdsInitializationLis
             return;
         }
 
-        Log.d(TAG, "Initializing Unity Ads with Game ID: " + gameId);
+        Log.d(TAG, "Initializing Unity Ads with Game ID: " + gameId + ", testMode=" + testMode);
         UnityAds.initialize(activity, gameId, testMode, this);
         call.resolve();
     }
@@ -80,34 +80,40 @@ public class UnityAdsPlugin extends Plugin implements IUnityAdsInitializationLis
             return;
         }
 
+        Log.d(TAG, "Loading placement: " + placementId);
+
         UnityAds.load(
-                placementId,
-                new UnityAdsLoadOptions(),
-                new IUnityAdsLoadListener() {
-                    @Override
-                    public void onUnityAdsAdLoaded(String adUnitId) {
-                        loadedPlacements.add(adUnitId);
+            placementId,
+            new UnityAdsLoadOptions(),
+            new IUnityAdsLoadListener() {
+                @Override
+                public void onUnityAdsAdLoaded(String adUnitId) {
+                    loadedPlacements.add(adUnitId);
 
-                        JSObject data = new JSObject();
-                        data.put("placementId", adUnitId);
-                        notifyListeners("unityAdsLoaded", data);
+                    Log.d(TAG, "Ad loaded: " + adUnitId);
 
-                        call.resolve(data);
-                    }
+                    JSObject data = new JSObject();
+                    data.put("placementId", adUnitId);
+                    notifyListeners("unityAdsLoaded", data);
 
-                    @Override
-                    public void onUnityAdsFailedToLoad(String adUnitId, UnityAds.UnityAdsLoadError error, String message) {
-                        loadedPlacements.remove(adUnitId);
-
-                        JSObject data = new JSObject();
-                        data.put("placementId", adUnitId);
-                        data.put("error", String.valueOf(error));
-                        data.put("message", message);
-                        notifyListeners("unityAdsLoadFailed", data);
-
-                        call.reject(error + ": " + message);
-                    }
+                    call.resolve(data);
                 }
+
+                @Override
+                public void onUnityAdsFailedToLoad(String adUnitId, UnityAds.UnityAdsLoadError error, String message) {
+                    loadedPlacements.remove(adUnitId);
+
+                    Log.e(TAG, "Load failed: " + adUnitId + " " + error + " " + message);
+
+                    JSObject data = new JSObject();
+                    data.put("placementId", adUnitId);
+                    data.put("error", String.valueOf(error));
+                    data.put("message", message);
+                    notifyListeners("unityAdsLoadFailed", data);
+
+                    call.reject(error + ": " + message);
+                }
+            }
         );
     }
 
@@ -130,87 +136,112 @@ public class UnityAdsPlugin extends Plugin implements IUnityAdsInitializationLis
             return;
         }
 
-        final Runnable doShow = new Runnable() {
+        Log.d(TAG, "Show requested for placement: " + placementId);
+
+        final IUnityAdsShowListener showListener = new IUnityAdsShowListener() {
             @Override
-            public void run() {
-                UnityAds.show(
-                        activity,
-                        placementId,
-                        new UnityAdsShowOptions(),
-                        new IUnityAdsShowListener() {
-                            @Override
-                            public void onUnityAdsShowFailure(String adUnitId, UnityAds.UnityAdsShowError error, String message) {
-                                JSObject data = new JSObject();
-                                data.put("placementId", adUnitId);
-                                data.put("error", String.valueOf(error));
-                                data.put("message", message);
-                                notifyListeners("unityAdsShowFailed", data);
-                            }
+            public void onUnityAdsShowFailure(String adUnitId, UnityAds.UnityAdsShowError error, String message) {
+                loadedPlacements.remove(adUnitId);
 
-                            @Override
-                            public void onUnityAdsShowStart(String adUnitId) {
-                                JSObject data = new JSObject();
-                                data.put("placementId", adUnitId);
-                                notifyListeners("unityAdsShown", data);
-                            }
+                Log.e(TAG, "Show failed: " + adUnitId + " " + error + " " + message);
 
-                            @Override
-                            public void onUnityAdsShowClick(String adUnitId) {
-                                JSObject data = new JSObject();
-                                data.put("placementId", adUnitId);
-                                notifyListeners("unityAdsClicked", data);
-                            }
+                JSObject data = new JSObject();
+                data.put("placementId", adUnitId);
+                data.put("error", String.valueOf(error));
+                data.put("message", message);
+                notifyListeners("unityAdsShowFailed", data);
 
-                            @Override
-                            public void onUnityAdsShowComplete(String adUnitId, UnityAds.UnityAdsShowCompletionState state) {
-                                loadedPlacements.remove(adUnitId);
+                call.reject(error + ": " + message);
+            }
 
-                                JSObject data = new JSObject();
-                                data.put("placementId", adUnitId);
-                                data.put("completionState", String.valueOf(state));
-                                notifyListeners("unityAdsClosed", data);
+            @Override
+            public void onUnityAdsShowStart(String adUnitId) {
+                Log.d(TAG, "Show started: " + adUnitId);
 
-                                if (rewardOnComplete && state == UnityAds.UnityAdsShowCompletionState.COMPLETED) {
-                                    notifyListeners("unityAdsRewarded", data);
-                                }
-                            }
-                        }
-                );
+                JSObject data = new JSObject();
+                data.put("placementId", adUnitId);
+                notifyListeners("unityAdsShown", data);
+            }
+
+            @Override
+            public void onUnityAdsShowClick(String adUnitId) {
+                Log.d(TAG, "Ad clicked: " + adUnitId);
+
+                JSObject data = new JSObject();
+                data.put("placementId", adUnitId);
+                notifyListeners("unityAdsClicked", data);
+            }
+
+            @Override
+            public void onUnityAdsShowComplete(String adUnitId, UnityAds.UnityAdsShowCompletionState state) {
+                loadedPlacements.remove(adUnitId);
+
+                Log.d(TAG, "Show complete: " + adUnitId + " state=" + state);
+
+                JSObject data = new JSObject();
+                data.put("placementId", adUnitId);
+                data.put("completionState", String.valueOf(state));
+                notifyListeners("unityAdsClosed", data);
+
+                if (rewardOnComplete && state == UnityAds.UnityAdsShowCompletionState.COMPLETED) {
+                    notifyListeners("unityAdsRewarded", data);
+                }
+
+                // Resolve ONLY when the ad is actually finished/closed
+                call.resolve(data);
             }
         };
 
+        // If already loaded, show immediately.
         if (loadedPlacements.contains(placementId)) {
-            doShow.run();
-            call.resolve();
+            Log.d(TAG, "Placement already loaded, showing now: " + placementId);
+
+            UnityAds.show(
+                activity,
+                placementId,
+                new UnityAdsShowOptions(),
+                showListener
+            );
             return;
         }
 
+        // Otherwise load first, then show.
+        Log.d(TAG, "Placement not loaded, loading first: " + placementId);
+
         UnityAds.load(
-                placementId,
-                new UnityAdsLoadOptions(),
-                new IUnityAdsLoadListener() {
-                    @Override
-                    public void onUnityAdsAdLoaded(String adUnitId) {
-                        loadedPlacements.add(adUnitId);
-                        doShow.run();
-                    }
+            placementId,
+            new UnityAdsLoadOptions(),
+            new IUnityAdsLoadListener() {
+                @Override
+                public void onUnityAdsAdLoaded(String adUnitId) {
+                    loadedPlacements.add(adUnitId);
 
-                    @Override
-                    public void onUnityAdsFailedToLoad(String adUnitId, UnityAds.UnityAdsLoadError error, String message) {
-                        loadedPlacements.remove(adUnitId);
+                    Log.d(TAG, "Loaded before show: " + adUnitId);
 
-                        JSObject data = new JSObject();
-                        data.put("placementId", adUnitId);
-                        data.put("error", String.valueOf(error));
-                        data.put("message", message);
-                        notifyListeners("unityAdsLoadFailed", data);
-
-                        call.reject(error + ": " + message);
-                    }
+                    UnityAds.show(
+                        activity,
+                        adUnitId,
+                        new UnityAdsShowOptions(),
+                        showListener
+                    );
                 }
-        );
 
-        call.resolve();
+                @Override
+                public void onUnityAdsFailedToLoad(String adUnitId, UnityAds.UnityAdsLoadError error, String message) {
+                    loadedPlacements.remove(adUnitId);
+
+                    Log.e(TAG, "Load before show failed: " + adUnitId + " " + error + " " + message);
+
+                    JSObject data = new JSObject();
+                    data.put("placementId", adUnitId);
+                    data.put("error", String.valueOf(error));
+                    data.put("message", message);
+                    notifyListeners("unityAdsLoadFailed", data);
+
+                    call.reject(error + ": " + message);
+                }
+            }
+        );
     }
 
     @Override
