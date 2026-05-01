@@ -1,3 +1,28 @@
+import { registerPlugin } from '@capacitor/core';
+
+const UnityAds = registerPlugin('UnityAds');
+
+const REWARDED_PLACEMENT_ID = 'Rewarded_Android';
+const INTERSTITIAL_PLACEMENT_ID = 'Interstitial_Android';
+
+// put your Unity Game ID here from Unity dashboard/project settings
+const GAME_ID = '6104076';
+
+
+async function initAds() {
+  try {
+    await UnityAds.init({
+      gameId: GAME_ID,
+      testMode: true
+    });
+  } catch (e) {
+    console.log("Init failed:", e);
+  }
+}
+
+initAds();
+
+
 kaplay({
     width: 500,
     height: 800,
@@ -210,8 +235,12 @@ btn.add([
 
 
 btn.onClick(() => {
-   // showInterstitial().catch(() => {});
-   go("game");
+    UnityAds.showRewarded({
+        placementId: "Rewarded_Android"
+    }).catch((e) => {
+        console.log("Ad failed:", e);
+        go("game"); // fallback if ad fails
+    });
 });
 
 });
