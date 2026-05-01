@@ -5,10 +5,10 @@ kaplay({
     stretch: true,
 });
 
-document.addEventListener("deviceready", async () => {
-    await initAds();
-    await showBanner();
-});
+//document.addEventListener("deviceready", async () => {
+  //  await initAds();
+ //   await showBanner();
+//});
 
 
 // sprites
@@ -210,7 +210,7 @@ btn.add([
 
 
 btn.onClick(() => {
-   showInterstitial().catch(() => {});
+   // showInterstitial().catch(() => {});
    go("game");
 });
 
