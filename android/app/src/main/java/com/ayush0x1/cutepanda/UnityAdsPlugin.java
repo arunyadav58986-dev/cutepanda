@@ -156,7 +156,11 @@ public class UnityAdsPlugin extends Plugin implements IUnityAdsInitializationLis
                     @Override
                     public void onUnityAdsAdLoaded(String adUnitId) {
                         loadedPlacements.add(adUnitId);
-                        UnityAds.show(activity, adUnitId, new UnityAdsShowOptions(), showListener);
+                        
+                        // FIX APPLIED HERE: Ensure this inner show() runs on the UI thread as well
+                        activity.runOnUiThread(() -> {
+                            UnityAds.show(activity, adUnitId, new UnityAdsShowOptions(), showListener);
+                        });
                     }
 
                     @Override

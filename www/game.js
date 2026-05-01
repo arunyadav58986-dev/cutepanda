@@ -1,7 +1,7 @@
-//
 const UnityAds = window.Capacitor?.Plugins?.UnityAds;
 const GAME_ID = "6104076";
 const REWARDED_PLACEMENT_ID = "Rewarded_Android";
+
 
 async function initAds() {
   if (!UnityAds) {
@@ -14,9 +14,13 @@ async function initAds() {
       gameId: GAME_ID,
       testMode: true
     });
-    alert("Unity Ads initialized");
+    
+    // Preload the ad so it is ready when the player dies
+    await UnityAds.loadRewarded({ placementId: REWARDED_PLACEMENT_ID });
+    
+    alert("Unity Ads initialized and preloading");
   } catch (e) {
-    alert("Init failed:", e);
+    alert("Init failed: " + e);
   }
 }
 
@@ -232,32 +236,20 @@ btn.add([
     color(255, 255, 255),
 ]);
 
-
-
-
-
-
-
-
-
-
 btn.onClick(async () => {
   try {
-    alert("Replay clicked");
-
+    // Show the rewarded ad[cite: 3]
     const result = await UnityAds.showRewarded({
       placementId: REWARDED_PLACEMENT_ID
     });
 
-    alert("Ad finished: " + JSON.stringify(result));
+    // Ad finished, go back to game
     go("game");
   } catch (e) {
-    alert("Ad failed: " + e);
+    console.log("Ad failed, restarting anyway: " + e);
     go("game");
   }
 });
-
-
 
 
 
