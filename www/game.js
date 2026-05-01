@@ -1,3 +1,4 @@
+//
 const UnityAds = window.Capacitor?.Plugins?.UnityAds;
 const GAME_ID = "6104076";
 const REWARDED_PLACEMENT_ID = "Rewarded_Android";
