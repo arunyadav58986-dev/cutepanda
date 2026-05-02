@@ -1,30 +1,78 @@
 const UnityAds = window.Capacitor?.Plugins?.UnityAds;
+
 const GAME_ID = "6104076";
 const REWARDED_PLACEMENT_ID = "Rewarded_Android";
 
+let adsReady = false;
 
 async function initAds() {
   if (!UnityAds) {
-    alert("UnityAds plugin not found");
+    console.log("UnityAds plugin not found");
     return;
   }
 
   try {
     await UnityAds.init({
       gameId: GAME_ID,
-      testMode: true
+      testMode: true,
     });
-    
-    // Preload the ad so it is ready when the player dies
-    await UnityAds.loadRewarded({ placementId: REWARDED_PLACEMENT_ID });
-    
-    alert("Unity Ads initialized and preloading");
+
+    console.log("Unity Ads init OK");
+
+    await loadRewardedAd();
+
   } catch (e) {
-    alert("Init failed: " + e);
+    console.log("Unity Ads init/load error:", e);
   }
 }
 
-initAds();
+async function loadRewardedAd() {
+  if (!UnityAds) return;
+
+  try {
+    await UnityAds.loadRewarded({
+      placementId: REWARDED_PLACEMENT_ID,
+    });
+
+    adsReady = true;
+    console.log("Rewarded ad loaded");
+  } catch (e) {
+    adsReady = false;
+    console.log("Rewarded ad load failed:", e);
+  }
+}
+
+async function showRewardedAd() {
+  if (!UnityAds || !adsReady) {
+    console.log("Ad not ready");
+    return false;
+  }
+
+  try {
+    const result = await UnityAds.showRewarded({
+      placementId: REWARDED_PLACEMENT_ID,
+    });
+
+    console.log("Rewarded ad shown:", result);
+
+    adsReady = false;
+    await loadRewardedAd();
+
+    return true;
+  } catch (e) {
+    console.log("Rewarded ad show failed:", e);
+
+    adsReady = false;
+    await loadRewardedAd();
+
+    return false;
+  }
+}
+
+document.addEventListener("deviceready", () => {
+  initAds();
+});
+
 
 kaplay({
     width: 500,
@@ -236,21 +284,17 @@ btn.add([
     color(255, 255, 255),
 ]);
 
+
+
+
+
+
+
+
 btn.onClick(async () => {
-  try {
-    // Show the rewarded ad[cite: 3]
-    const result = await UnityAds.showRewarded({
-      placementId: REWARDED_PLACEMENT_ID
-    });
-
-    // Ad finished, go back to game
-    go("game");
-  } catch (e) {
-    console.log("Ad failed, restarting anyway: " + e);
-    go("game");
-  }
+  await showRewardedAd();
+  go("game");
 });
-
 
 
 
