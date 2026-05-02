@@ -1,78 +1,32 @@
-const UnityAds = window.Capacitor?.Plugins?.UnityAds;
-
-const GAME_ID = "6104806";
-const REWARDED_PLACEMENT_ID = "Rewarded_Android";
-
-let adsReady = false;
+const StartioAds = window.Capacitor?.Plugins?.StartioAds;
+const STARTIO_APP_ID = "204418927";
 
 async function initAds() {
-  if (!UnityAds) {
-    console.log("UnityAds plugin not found");
+  if (!StartioAds) {
+    console.log("StartioAds plugin not found");
     return;
   }
 
   try {
-    await UnityAds.init({
-      gameId: GAME_ID,
-      testMode: true,
-    });
-
-    console.log("Unity Ads init OK");
-
-    await loadRewardedAd();
-
+    await StartioAds.init({ appId: STARTIO_APP_ID });
+    console.log("Start.io init OK");
   } catch (e) {
-    console.log("Unity Ads init/load error:", e);
+    console.log("Start.io init error:", e);
   }
 }
 
-async function loadRewardedAd() {
-  if (!UnityAds) return;
+async function showInterstitialAd() {
+  if (!StartioAds) return;
 
   try {
-    await UnityAds.loadRewarded({
-      placementId: REWARDED_PLACEMENT_ID,
-    });
-
-    adsReady = true;
-    console.log("Rewarded ad loaded");
+    await StartioAds.showInterstitial();
+    console.log("Start.io ad shown");
   } catch (e) {
-    adsReady = false;
-    console.log("Rewarded ad load failed:", e);
+    console.log("Start.io ad skipped:", e);
   }
 }
 
-async function showRewardedAd() {
-  if (!UnityAds || !adsReady) {
-    console.log("Ad not ready");
-    return false;
-  }
-
-  try {
-    const result = await UnityAds.showRewarded({
-      placementId: REWARDED_PLACEMENT_ID,
-    });
-
-    console.log("Rewarded ad shown:", result);
-
-    adsReady = false;
-    await loadRewardedAd();
-
-    return true;
-  } catch (e) {
-    console.log("Rewarded ad show failed:", e);
-
-    adsReady = false;
-    await loadRewardedAd();
-
-    return false;
-  }
-}
-
-document.addEventListener("deviceready", () => {
-  initAds();
-});
-
+document.addEventListener("deviceready", initAds);
 
 kaplay({
     width: 500,
@@ -289,13 +243,10 @@ btn.add([
 
 
 
-
-
 btn.onClick(async () => {
-  await showRewardedAd();
+  await showInterstitialAd();
   go("game");
 });
-
 
 
 
