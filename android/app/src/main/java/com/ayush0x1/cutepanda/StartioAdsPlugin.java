@@ -22,7 +22,7 @@ public class StartioAdsPlugin extends Plugin {
 
         getActivity().runOnUiThread(() -> {
             try {
-                StartAppSDK.setTestAdsEnabled(true); // testing only
+                StartAppSDK.setTestAdsEnabled(false);
                 StartAppSDK.init(getActivity(), appId, false);
                 StartAppAd.disableSplash();
                 call.resolve();
