@@ -1,32 +1,13 @@
-const StartioAds = window.Capacitor?.Plugins?.StartioAds;
-const STARTIO_APP_ID = "204418927";
-
-async function initAds() {
-  if (!StartioAds) {
-    console.log("StartioAds plugin not found");
-    return;
+document.addEventListener("DOMContentLoaded", async () => {
+  if (window.initAds) {
+    await window.initAds();
+  } else {
+    console.log("initAds not found");
   }
+});
 
-  try {
-    await StartioAds.init({ appId: STARTIO_APP_ID });
-    console.log("Start.io init OK");
-  } catch (e) {
-    console.log("Start.io init error:", e);
-  }
-}
 
-async function showInterstitialAd() {
-  if (!StartioAds) return;
 
-  try {
-    await StartioAds.showInterstitial();
-    console.log("Start.io ad shown");
-  } catch (e) {
-    console.log("Start.io ad skipped:", e);
-  }
-}
-
-document.addEventListener("deviceready", initAds);
 
 kaplay({
     width: 500,
@@ -242,12 +223,15 @@ btn.add([
 
 
 
-
 btn.onClick(async () => {
-  await showInterstitialAd();
+  try {
+    await window.showInterstitial();
+  } catch (e) {
+    console.log("Ad error:", e);
+  }
+
   go("game");
 });
-
 
 
 

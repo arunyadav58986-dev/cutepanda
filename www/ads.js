@@ -1,40 +1,60 @@
-// NO import, NO export
+const StartioAds = window.Capacitor?.Plugins?.StartioAds;
 
-async function initAds() {
-  try {
-    const { AdMob } = Capacitor.Plugins;
+const STARTIO_APP_ID = "204418927";
 
-    await AdMob.initialize({
-      requestTrackingAuthorization: true,
-    });
-  } catch (e) {
-    console.log("initAds error:", e);
+window.initAds = async function () {
+  if (!StartioAds) {
+    console.log("StartioAds plugin not found");
+    return false;
   }
-}
 
-async function showBanner() {
   try {
-    const { AdMob } = Capacitor.Plugins;
-
-    await AdMob.showBanner({
-      adId: "ca-app-pub-4986355696565453/2572080211",
-      position: "BOTTOM_CENTER"
-    });
-  } catch (e) {
-    console.log("banner error:", e);
-  }
-}
-
-async function showInterstitial() {
-  try {
-    const { AdMob } = Capacitor.Plugins;
-
-    await AdMob.prepareInterstitial({
-      adId: "ca-app-pub-4986355696565453/7651867728"
+    const res = await StartioAds.init({
+      appId: STARTIO_APP_ID,
     });
 
-    await AdMob.showInterstitial();
+    console.log("Start.io init success:", res);
+
+    try {
+      await StartioAds.loadInterstitial();
+      console.log("Start.io interstitial preload called");
+    } catch (e) {
+      console.log("Start.io preload failed:", e);
+    }
+
+    return true;
   } catch (e) {
-    console.log("interstitial error:", e);
+    console.log("Start.io init failed:", e);
+    return false;
   }
-}
+};
+
+window.showInterstitial = async function () {
+  if (!StartioAds) {
+    console.log("StartioAds plugin not found");
+    return false;
+  }
+
+  try {
+    const ready = await StartioAds.isInterstitialReady();
+    console.log("Start.io ready:", ready);
+
+    if (!ready.loaded) {
+      console.log("Interstitial not ready, loading now");
+      try {
+        await StartioAds.loadInterstitial();
+      } catch (e) {
+        console.log("Load failed:", e);
+      }
+      return false;
+    }
+
+    const res = await StartioAds.showInterstitial();
+    console.log("Start.io show success:", res);
+    return true;
+
+  } catch (e) {
+    console.log("Start.io show failed:", e);
+    return false;
+  }
+};
